@@ -74,10 +74,10 @@ pipeline{
                     if ( deployment_status_code == 0 ){
                         def container_name = sh( label:"Container_Name", script: 'kubectl get deploy ${CODE_BASE} -n ${JOB_NAME} -o jsonpath="{.spec.template.spec.containers[*].name}"', returnStdout: true)
                         
-                        #Rollout of new application
+                        //Rollout of new application
                         sh ( label:"Rollout_App", script: 'kubectl set image deployment/${CODE_BASE} -n ${JOB_NAME} ${container_name}=${DOCKER_REPOSITORY}/${CODE_BASE}:${IMAGE_VERSION}')
                         
-                        # Wait for the rollout to be complete
+                        //Wait for the rollout to be complete
                         rollout_status_code =  sh( label:"Rollout Status", script: 'kubectl rollout status deploy/$CODE_BASE -n $JOB_NAME | grep success', returnStatus: true)
                         if ( rollout_status_code != 0 ){
                             error("Rollout of new Application Failed")
