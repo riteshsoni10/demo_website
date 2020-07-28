@@ -70,8 +70,8 @@ pipeline{
         stage("Application Rollout"){
             steps{
                 script{
-                    env.DEPLOYMENT_STATUS_CODE = sh (label:'Deployment_Name', script: 'kubectl get deployment $CODE_BASE -n ${JOB_NAME}', returnStatus: true, returnStdout: false)
-                    if ( DEPLOYMENT_STATUS_CODE == 0 ){
+                    try{
+                        sh (label:'Deployment_Name', script: 'kubectl get deployment $CODE_BASE -n ${JOB_NAME}')
                         def container_name = sh( label:"Container_Name", script: 'kubectl get deploy ${CODE_BASE} -n ${JOB_NAME} -o jsonpath="{.spec.template.spec.containers[*].name}"', returnStdout: true)
                         
                         //Rollout of new application
@@ -81,12 +81,12 @@ pipeline{
                         rollout_status_code =  sh( label:"Rollout Status", script: 'kubectl rollout status deploy/$CODE_BASE -n $JOB_NAME | grep success', returnStatus: true)
                         if ( rollout_status_code != 0 ){
                             error("Rollout of new Application Failed")
-                        }    
-                    }
-                    else{
-                        println("Application is not yet deployed")
-                    }
-                }
+                        }
+                    }catch(e){
+                        println("Application is not yet Deployed")
+                        env.DEPLOYMENT_STATUS_CODE=1
+                    }   
+                }     
             }
         }
         stage("Application Deployment"){
