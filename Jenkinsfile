@@ -75,7 +75,7 @@ pipeline{
                         def container_name = sh( label:"Container_Name", script: 'kubectl get deploy ${CODE_BASE} -n ${JOB_NAME} -o jsonpath="{.spec.template.spec.containers[*].name}"', returnStdout: true)
                         println("$container_name")
                         //Rollout of new application
-                        sh ( label:"Rollout_App", script: 'kubectl set image deployment/${CODE_BASE} -n ${JOB_NAME} ${container_name}=${DOCKER_REPOSITORY}/${CODE_BASE}:${IMAGE_VERSION}', returnStatus: true)
+                        status_code=sh ( label:"Rollout_App", script: 'kubectl set image deployment/${CODE_BASE} -n ${JOB_NAME} ${container_name}=${DOCKER_REPOSITORY}/${CODE_BASE}:${IMAGE_VERSION}', returnStatus: true)
                         
                         //Wait for the rollout to be complete
                         rollout_status_code =  sh( label:"Rollout Status", script: 'kubectl rollout status deploy/$CODE_BASE -n $JOB_NAME | grep success', returnStatus: true)
@@ -84,7 +84,7 @@ pipeline{
                         }
                     }catch(e){
                         error_msg = e.toString()
-			println("$error_msg")
+			            println("$error_msg")
                         if ( error_msg == "hudson.AbortException: script returned exit code 1"){
                             println("Application is not yet Deployed")
                             env.DEPLOYMENT_STATUS_CODE=1
