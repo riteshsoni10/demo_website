@@ -103,7 +103,7 @@ pipeline{
 	
                     if ( new_deploy_status_code == 0 ){            
                         //Wait till the pods are in running state
-                        while true
+                        while (true)
                         {
                             def pods_status_code = sh( label: "Pods Status", script: 'kubectl get pods -n $JOB_NAME -l app=$CODE_BASE -o jsonpath="{.items[*].status.containerStatuses[*].state.running}"', returnStdout: true) 
                             if (pods_status_code){
