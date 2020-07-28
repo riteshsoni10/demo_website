@@ -83,8 +83,14 @@ pipeline{
                             error("Rollout of new Application Failed")
                         }
                     }catch(e){
-                        println("Application is not yet Deployed")
-                        env.DEPLOYMENT_STATUS_CODE=1
+                        error_msg = e.toString()
+                        if ( error_msg == "hudson.AbortException: script returned exit code 1"){
+                            println("Application is not yet Deployed")
+                            env.DEPLOYMENT_STATUS_CODE=1
+                        }
+                        else{
+                            error("Task exited with $error_msg")
+                        }
                     }   
                 }     
             }
