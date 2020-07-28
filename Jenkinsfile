@@ -53,12 +53,21 @@ pipeline{
         }
         stage("Push Image"){
             steps{
-               script{
-                   sh 'docker push ${DOCKER_REPOSITORY}/${CODE_BASE}:${IMAGE_VERSION}'
-               }
+                sh 'docker push ${DOCKER_REPOSITORY}/${CODE_BASE}:${IMAGE_VERSION}'
+            }
+        }
+        stage("Application Environment"){
+            steps{
+                script{
+                    if ( ! sh label: 'Namespace', returnStatus: true, script: 'kubectl get ns JOB_NAME >/dev/null')
+                    {
+                        sh 'kubectl create ns ${JOB_NAME}'
+                    }
+                }
             }
         }
         
+
     }
 }
 
