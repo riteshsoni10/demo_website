@@ -1,8 +1,9 @@
+def repo_url=getBinding().getVariables()['GIT_URL']
 
-pipelineJob('web_application_deployment'){
-    description('Web Application Deployment using Jenkins Pipeline')
+pipelineJob('test-env'){
+    description('Web Application Deployment in Test Environment using Jenkins Pipeline')
     properties {
-        githubProjectUrl('https://github.com/riteshsoni10/demo_website.git')
+        githubProjectUrl("$repo_url")
     }
     definition {
         triggers {
@@ -12,7 +13,30 @@ pipelineJob('web_application_deployment'){
             scm {
                 git{
                     remote {
-                        url('https://github.com/riteshsoni10/demo_website.git')
+                        url("$repo_url")
+                    }
+                    branch('*/develop')     
+                }
+            }
+            lightweight()
+        }
+    }
+}
+
+pipelineJob('prod-env'){
+    description('Web Application Deployment in Production Environment using Jenkins Pipeline')
+    properties {
+        githubProjectUrl("$git_url")
+    }
+    definition {
+        triggers {
+             githubPush()
+        }
+       cpsScm {
+            scm {
+                git{
+                    remote {
+                        url("$git_url")
                     }
                     branch('*/master')     
                 }
@@ -21,3 +45,5 @@ pipelineJob('web_application_deployment'){
         }
     }
 }
+
+
