@@ -31,10 +31,12 @@ pipeline{
             steps{
                 script{
                     if ( GIT_BRANCH == "origin/master" ){
-                        sh 'docker build . -t ${DOCKER_REPOSITORY}/${CODE_BASE}:RELEASE_v${BUILD_NUMBER} --no-cache'
+                        env.IMAGE_VERSION="RELEASE_v${BUILD_NUMBER}"
+                        sh 'docker build . -t ${DOCKER_REPOSITORY}/${CODE_BASE}:${IMAGE_VERSION} --no-cache'
                     }
                     else if ( GIT_BRANCH == "origin/develop" ){
-                        sh 'docker build . -t ${DOCKER_REPOSITORY}/${CODE_BASE}:TEST_v${BUILD_NUMBER} --no-cache'
+                        env.IMAGE_VERSION="TEST_v${BUILD_NUMBER}"
+                        sh 'docker build . -t ${DOCKER_REPOSITORY}/${CODE_BASE}:${IMAGE_VERSION} --no-cache'
                     }
                     else{
                         error("Please push code to develop BRANCH for testing ")
@@ -52,10 +54,11 @@ pipeline{
         stage("Push Image"){
             steps{
                script{
-                   echo "hello"
+                   sh 'docker push ${DOCKER_REPOSITORY}/${CODE_BASE}:${IMAGE_VERSION}'
                }
             }
         }
+        
     }
 }
 
