@@ -84,6 +84,7 @@ pipeline{
                         }
                     }catch(e){
                         error_msg = e.toString()
+			println("$error_msg")
                         if ( error_msg == "hudson.AbortException: script returned exit code 1"){
                             println("Application is not yet Deployed")
                             env.DEPLOYMENT_STATUS_CODE=1
