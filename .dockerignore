@@ -1,5 +1,4 @@
 .git
 *.md
 Jenkinsfile
-scripts
-scripts/*
+*.groovy
