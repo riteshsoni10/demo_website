@@ -7,16 +7,23 @@ pipeline{
         stage('Detect Code Base'){
             steps{
                 script{
-                    if ( $(find . -type f \( -name "*.php" -a -name "*.html" \) | wc -l ) -gt 0 )
-                    then
-	                    echo "PHP and HTML Code found"
-                            DEPLOYMENT_NAME="php-application"
-                    ## Checking if the only HTML language code is present
-		    elif ( $(find . -type f  -name "*.html" | wc -l ) -gt 0 )
-		    then
-	                    echo "HTML Code found"
-                            DEPLOYMENT_NAME="web-application"
-                    fi
+                    def files_list = findFiles(glob: "*.php")
+                    if ( files_list == [] ){
+                       files_list = findFiles(glob: "*.html")
+                       if ( files_list == [] ){
+                            println("Unknown Code Base Detected")
+                            error("Unknown Code Base Detected")
+                       }
+                       else{
+                           println("HTML Code Base Detected")
+                           env.CODE_BASE="web-application"
+                           sh 'printenv'
+                       }
+                    }
+                    else{
+                         println("PHP Code Base Detected")
+                         env.CODE_BASE="php-application"
+                    }    
                 }
             }
         }
