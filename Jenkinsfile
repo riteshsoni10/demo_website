@@ -18,7 +18,6 @@ pipeline{
                        else{
                            println("HTML Code Base Detected")
                            env.CODE_BASE="web-application"
-                           sh 'printenv'
                        }
                     }
                     else{
