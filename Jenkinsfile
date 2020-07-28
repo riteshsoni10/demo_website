@@ -1,9 +1,9 @@
 pipeline{
     agent any
     stages{
-        stage('Checkout'){
+        stage('Detect Code Base'){
             steps{
-               scm()
+                
             }
         }
     }
