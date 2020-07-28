@@ -44,7 +44,7 @@ pipeline{
                 }
             }
         }
-        stage("Docker Hub Login"){
+        stage("Image Repo Login"){
             steps{
                 withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CREDENTIALS', passwordVariable: 'docker_password', usernameVariable: 'docker_user')]) {
                     sh 'docker login -u="$docker_user" -p="$docker_password"'
@@ -53,21 +53,39 @@ pipeline{
         }
         stage("Push Image"){
             steps{
-                sh 'docker push ${DOCKER_REPOSITORY}/${CODE_BASE}:${IMAGE_VERSION}'
+                sh 'docker push $DOCKER_REPOSITORY/$CODE_BASE:$IMAGE_VERSION'
             }
         }
-        stage("Application Environment"){
+        stage("Application Namespace"){
             steps{
                 script{
-                    def status_code = sh (label: 'Namespace', returnStatus: true, script: 'kubectl get ns ${JOB_NAME} >/dev/null')
+                    def status_code = sh (label: 'Namespace', script: 'kubectl get ns $JOB_NAME >/dev/null', returnStatus: true )
                     if ( status_code != 0 )
                     {
-                        sh 'kubectl create ns ${JOB_NAME}'
+                        sh 'kubectl create ns $JOB_NAME'
                     }
                 }
             }
         }
-        
+        stage("Application Rollout"){
+            steps{
+                script{
+                    env.deployment_status_code = sh (label:'Deployment_Name', script: 'kubectl get deployment $CODE_BASE -n ${JOB_NAME}', returnStatus: true, returnStdout: false)
+                    if ( deployment_status_code == 0 ){
+                        def container_name = sh( label:"Container_Name", script: 'kubectl get deploy ${CODE_BASE} -n ${JOB_NAME} -o jsonpath="{.spec.template.spec.containers[*].name}"', returnStdout: true)
+                        
+                        #Rollout of new application
+                        sh ( label:"Rollout_App", script: 'kubectl set image deployment/${CODE_BASE} -n ${JOB_NAME} ${container_name}=${DOCKER_REPOSITORY}/${CODE_BASE}:${IMAGE_VERSION}')
+                        
+                        # Wait for the rollout to be complete
+                        rollout_status_code =  sh( label:"Rollout Status", script: 'kubectl rollout status deploy/$CODE_BASE -n $JOB_NAME | grep success', returnStatus: true)
+                        if ( rollout_status_code != 0 ){
+                            error("Rollout of new Application Failed")
+                        }    
+                    }
+                }
+            }
+        }
 
     }
 }
