@@ -30,10 +30,9 @@ pipeline{
         stage("Build Image"){
             steps{
                 script{
-                    if ( $GIT_BRANCH == "master" )
-                    then
-                        docker build . -t $DOCKER_REPOSITORY/$DEPLOYMENT_NAME'_release':v${BUILD_NUMBER} --no-cache
-
+                    if ( $GIT_BRANCH == "master" ){
+                        sh 'docker build . -t ${DOCKER_REPOSITORY}/${CODE_BASE}_release:v${BUILD_NUMBER} --no-cache'
+                    }
                 }
             }
         }
