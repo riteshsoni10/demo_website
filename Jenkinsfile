@@ -59,7 +59,8 @@ pipeline{
         stage("Application Environment"){
             steps{
                 script{
-                    if !( sh (label: 'Namespace', returnStatus: true, script: 'kubectl get ns ${JOB_NAME} >/dev/null'))
+                    def status_code = sh (label: 'Namespace', returnStatus: true, script: 'kubectl get ns ${JOB_NAME} >/dev/null')
+                    if ( status_code != 0 )
                     {
                         sh 'kubectl create ns ${JOB_NAME}'
                     }
