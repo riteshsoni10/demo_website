@@ -7,14 +7,15 @@ pipeline{
         stage('Detect Code Base'){
             steps{
                 script{
-                    if [ $(find . -type f \( -name "*.php" -a -name "*.html" \) | wc -l ) -gt 0 ]
+                    if ( $(find . -type f \( -name "*.php" -a -name "*.html" \) | wc -l ) -gt 0 )
                     then
 	                    echo "PHP and HTML Code found"
-                        DEPLOYMENT_NAME="php-application"
+                            DEPLOYMENT_NAME="php-application"
                     ## Checking if the only HTML language code is present
-                    elif [ $(find . -type f  -name "*.html" | wc -l ) -gt 0 ]; then
+		    elif ( $(find . -type f  -name "*.html" | wc -l ) -gt 0 )
+		    then
 	                    echo "HTML Code found"
-                        DEPLOYMENT_NAME="web-application"
+                            DEPLOYMENT_NAME="web-application"
                     fi
                 }
             }
