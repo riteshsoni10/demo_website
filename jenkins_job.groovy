@@ -7,7 +7,7 @@ pipelineJob('test-env'){
     }
     definition {
         triggers {
-             githubPush()
+             scm(* * * * *)
         }
        cpsScm {
             scm {
@@ -30,7 +30,8 @@ pipelineJob('prod-env'){
     }
     definition {
         triggers {
-             githubPush()
+            //githubPush()
+            scm(* * * * *)
         }
        cpsScm {
             scm {

@@ -31,7 +31,13 @@ pipeline{
             steps{
                 script{
                     if ( GIT_BRANCH == "origin/master" ){
-                        sh 'docker build . -t ${DOCKER_REPOSITORY}/${CODE_BASE}_release:v${BUILD_NUMBER} --no-cache'
+                        sh 'docker build . -t ${DOCKER_REPOSITORY}/${CODE_BASE}:RELEASE_v${BUILD_NUMBER} --no-cache'
+                    }
+                    else if ( GIT_BRANCH == "origin/develop" ){
+                        sh 'docker build . -t ${DOCKER_REPOSITORY}/${CODE_BASE}:TEST_v${BUILD_NUMBER} --no-cache'
+                    }
+                    else{
+                        error("Please push code to develop BRANCH for testing ")
                     }
                 }
             }
