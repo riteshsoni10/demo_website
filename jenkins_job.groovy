@@ -26,7 +26,7 @@ pipelineJob('test-env'){
 pipelineJob('prod-env'){
     description('Web Application Deployment in Production Environment using Jenkins Pipeline')
     properties {
-        githubProjectUrl("$git_url")
+        githubProjectUrl("$repo_url")
     }
     definition {
         triggers {
@@ -36,7 +36,7 @@ pipelineJob('prod-env'){
             scm {
                 git{
                     remote {
-                        url("$git_url")
+                        url("$repo_url")
                     }
                     branch('*/master')     
                 }
