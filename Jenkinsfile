@@ -42,6 +42,13 @@ pipeline{
                 }
             }
         }
+        stage("Docker Hub Login"){
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CREDENTIALS', passwordVariable: 'docker_password', usernameVariable: 'docker_userr')]) {
+                    sh 'docker login -u="$docker_user" -p="$docker_password"'
+                }
+            }
+        }
         stage("Push Image"){
             steps{
                script{
