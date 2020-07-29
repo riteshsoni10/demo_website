@@ -76,9 +76,10 @@ pipeline{
                         env.DEPLOYMENT_STATUS_CODE= 0
                     }catch(e){
                         println("Application is not yet Deployed")
-                        env.DEPLOYMENT_STATUS_CODE=1
+                        env.DEPLOYMENT_STATUS_CODE = 1
                     }  
-                    if (DEPLOYMENT_STATUS_CODE != 1){
+                    println("$DEPLOYMENT_STATUS_CODE")
+                    if (DEPLOYMENT_STATUS_CODE != "1"){
                         def container_name = sh( label:"Container_Name", script: 'kubectl get deploy $CODE_BASE -n $JOB_NAME -o jsonpath="{.spec.template.spec.containers[*].name}"', returnStdout: true)
                         //Rollout of new application
                         try{
