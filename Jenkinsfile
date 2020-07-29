@@ -144,6 +144,16 @@ pipeline{
                     script{
                         if ( GIT_BRANCH == "origin/develop" ){
                             println("Merging  Code to Production Code Base")
+
+                            sh 'git config user.email riteshk.296@gmail.com'
+                            sh 'git config user.name riteshsoni10'
+                            sh 'git fetch --all'
+                            sh 'git checkout origin/master'
+                            sh 'git merge origin/develop'
+                            //## Pushing code to master
+                            withCredentials([usernamePassword(credentialsId: 'GITHUB_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                                sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/riteshsoni10/demo_website.git HEAD:master')
+                            }
                         }
                     }
                 }
