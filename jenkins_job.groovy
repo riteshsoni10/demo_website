@@ -1,5 +1,6 @@
 def repo_url=getBinding().getVariables()['GIT_URL']
 
+
 pipelineJob('test-env'){
     description('Web Application Deployment in Test Environment using Jenkins Pipeline')
     properties {
