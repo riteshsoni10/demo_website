@@ -16,7 +16,15 @@ pipelineJob('test-env'){
                     remote {
                         url("$repo_url")
                     }
-                    branch('*/develop')     
+                    branch('*/develop') 
+                    extensions {
+                        userIdentity {
+                            // If given, "git config user.name [this]" is called before builds.
+                            name("jenkins_server")
+                            // If given, "git config user.email [this]" is called before builds.
+                            email("jenkins_server@localhost")
+                        } 
+                    }    
                 }
             }
             lightweight()

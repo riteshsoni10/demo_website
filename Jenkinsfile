@@ -78,7 +78,6 @@ pipeline{
                         println("Application is not yet Deployed")
                         env.DEPLOYMENT_STATUS_CODE = 1
                     }  
-                    println("$DEPLOYMENT_STATUS_CODE")
                     if (DEPLOYMENT_STATUS_CODE != "1"){
                         def container_name = sh( label:"Container_Name", script: 'kubectl get deploy $CODE_BASE -n $JOB_NAME -o jsonpath="{.spec.template.spec.containers[*].name}"', returnStdout: true)
                         //Rollout of new application
@@ -155,6 +154,9 @@ pipeline{
                             withCredentials([usernamePassword(credentialsId: 'GITHUB_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                                 sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/riteshsoni10/demo_website.git HEAD:master')
                             }
+                        }
+                        else{
+                            println("Aplication Tested Successfully")
                         }
                     }
                 }
