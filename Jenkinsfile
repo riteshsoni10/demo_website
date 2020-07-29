@@ -3,6 +3,7 @@ pipeline{
     environment{
         DOCKER_REPOSITORY="riteshsoni296"
         SERVICE_EXPOSE_TYPE="LoadBalancer"
+        KUBERNETES_CLUSTER_IP="192.168.99.106"
     }
     stages{
         stage('Detect Code Base'){
@@ -72,22 +73,22 @@ pipeline{
                 script{
                     try{
                         sh (label:'Deployment_Name', script: 'kubectl get deployment $CODE_BASE -n $JOB_NAME')
+                        env.DEPLOYMENT_STATUS_CODE= 0
                     }catch(e){
                         println("Application is not yet Deployed")
                         env.DEPLOYMENT_STATUS_CODE=1
                     }  
-                    def container_name = sh( label:"Container_Name", script: 'kubectl get deploy $CODE_BASE -n $JOB_NAME -o jsonpath="{.spec.template.spec.containers[*].name}"', returnStdout: true)
-                    println("$container_name")
-                    //Rollout of new application
-                    try{
-                        sh ( label:"Rollout_App", script: 'kubectl set image deployment/$CODE_BASE -n $JOB_NAME $container_name=$DOCKER_REPOSITORY/$CODE_BASE:$IMAGE_VERSION', returnStatus: true)
-                            
-                        //Wait for the rollout to be complete
-                        sh( label:"Rollout Status", script: 'kubectl rollout status deploy/$CODE_BASE -n $JOB_NAME | grep success', returnStatus: true)
-                    }catch(e){
-                        //if ( rollout_status_code != 0 ){
-                        error("Rollout of new Application Failed")
-                        //}
+                    if (DEPLOYMENT_STATUS_CODE != 1){
+                        def container_name = sh( label:"Container_Name", script: 'kubectl get deploy $CODE_BASE -n $JOB_NAME -o jsonpath="{.spec.template.spec.containers[*].name}"', returnStdout: true)
+                        //Rollout of new application
+                        try{
+                            sh ( label:"Rollout_App", script: "kubectl set image deployment/$CODE_BASE -n $JOB_NAME $container_name=$DOCKER_REPOSITORY/$CODE_BASE:$IMAGE_VERSION", returnStdout: true)
+                                
+                            //Wait for the rollout to be complete
+                            sh( label:"Rollout Status", script: "kubectl rollout status deploy/$CODE_BASE -n $JOB_NAME | grep success", returnStdout: true)
+                        }catch(e){
+                            error("Rollout of new Application Failed")
+                        }
                     }
                 }     
             }
@@ -121,6 +122,38 @@ pipeline{
                     else{
                         error("Failed to create a deployment")
                     }
+                }
+            }
+        }
+        stage("Application Testing"){
+            steps{
+                sh( label:"Application Service", script: "kubectl get svc $CODE_BASE -n $JOB_NAME")
+                script{
+                    def application_port = sh(label:"Application Port", script: "kubectl get svc $CODE_BASE -n $JOB_NAME -o jsonpath=\"{.spec.ports[0].nodePort}\"", returnStdout: true)
+                    def application_status = sh(label:"Testing Application", script: "curl -s -w \"%{http_code}\" -o /dev/null $KUBERNETES_CLUSTER_IP:$application_port", returnStdout: true)
+                    if (application_status == 200){
+                        println("Application is working Fine")
+                    }    
+                    else{
+                        error("Application Not Working Properly ")
+                    }
+                } 
+            }
+            post{
+                success{
+                    script{
+                        if ( GIT_BRANCH == "origin/develop" ){
+                            println("Merging  Code to Production Code Base")
+                        }
+                    }
+                }
+                failure{
+                    println("Builf Failed")
+                    emailext attachLog: true,
+                        body: "${currentBuild.currentResult}: Job ${JOB_NAME} build ${BUILD_NUMBER}\n More info at: ${BUILD_URL}",
+                        compressLog: true,
+                        recipientProviders: [developers(), requestor()],
+                        subject: "Jenkins Build ${currentBuild.currentResult}: Job ${JOB_NAME}"
                 }
             }
         }
