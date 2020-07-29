@@ -158,7 +158,7 @@ pipeline{
                     }
                 }
                 failure{
-                    println("Builf Failed")
+                    println("Build Failed")
                     emailext attachLog: true,
                         body: "${currentBuild.currentResult}: Job ${JOB_NAME} build ${BUILD_NUMBER}\n More info at: ${BUILD_URL}",
                         compressLog: true,
