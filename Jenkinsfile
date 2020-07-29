@@ -131,7 +131,7 @@ pipeline{
                 script{
                     def application_port = sh(label:"Application Port", script: "kubectl get svc $CODE_BASE -n $JOB_NAME -o jsonpath=\"{.spec.ports[0].nodePort}\"", returnStdout: true)
                     def application_status = sh(label:"Testing Application", script: "curl -s -w \"%{http_code}\" -o /dev/null $KUBERNETES_CLUSTER_IP:$application_port", returnStdout: true)
-                    if (application_status == 200){
+                    if (application_status == "200"){
                         println("Application is working Fine")
                     }    
                     else{
